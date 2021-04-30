@@ -1,99 +1,120 @@
-import tkinter as tk
-import datetime as dt
-from tkinter import messagebox
-from tkinter import simpledialog
-import winsound
+
 import time
+import tkinter as tk
+from tkinter import *
+from tkinter import messagebox
+import winsound
+import sounds as mySounds 
+ 
+# creating Tk window
+root = tk.Tk()
+  
+# canvas dimensions
+canvas = tk.Canvas(root, width = 600, height = 300)
+canvas.pack() 
 
-root= tk.Tk()
-root.title('Juan Pomodoro app')
+# Using title() to display a message in
+# the dialogue box of the message in the
+# title bar.
+root.title("Kayaba Pomodoro app")
+  
+# Declaration of variables
 
-def main_pomodoro(t_now, t_fut, t_fin, t_pom, delta_sec):
-    total_pomodoros = 0
-    while True:
-        # Pomodoro time! Code for adding and maintaining the websites to be blocked!
-        if t_now < t_fut:
-            label1 = tk.Label(root, text= t_now)
-            canvas1.create_window(200, 230, window=label1)
-        elif t_fut <= t_now <= t_fin:
-            # allow for browsing again. Remove websites from hosts file
-            print('Break time!')
-        #Pomodoro and break finished. Check if ready for another pomodoro!
-        else:
-            total_pomodoros += 1
-            print('Pomodoro Finished!!')
-            # Ring a bell (with print('\a') to alert of end of program.
-            print('end')
-            # Annoy!
-            for i in range(10):
-                winsound.Beep((i+100), 500)
-            
-            usr_ans = messagebox.askyesno("Pomodoro Finished!","Would you like to start another pomodoro?")
-            #usr_ans = input("Timer has finished. \nWould you like to start another pomodoro? \nY/N:  ")
+minute=StringVar()
+second=StringVar()
+  
+# setting the default value as --
 
-            if usr_ans == True:
-                # user wants another pomodoro! Update values to indicate new timeset.
-                t_now = dt.datetime.now()
-                t_fut = t_now + dt.timedelta(0,t_pom)
-                t_fin = t_now + dt.timedelta(0,t_pom+delta_sec)
-                continue
-            elif usr_ans == False:
-                print(f'Pomodoro timer complete! \nYou have completed {total_pomodoros} pomodoros today.')
-                # unlock the websites
-                # Show a final message)
-                messagebox.showinfo("Pomodoro Finished!", "\nIt is now "+timenow+
-                "\nYou completed "+str(total_pomodoros)+" pomodoros today!")
-                break
-        # check every 3 seconds and update current time
-        time.sleep(2)
-        t_now = dt.datetime.now()
-        timenow = t_now.strftime("%H:%M")
+minute.set("--")
+second.set("--")
+  
+# Use of Entry class to take input from the user
 
-    
-def start():
-    user_start = entry1.get()
-    p_length = Pomodoro_length.get()
-    b_length = Break_length.get()
+minuteEntry= Label(root, width=3, font=("Arial",25,""),
+                   textvariable=minute)
+minuteEntry.place(x=220,y=220)
+  
+secondEntry= Label(root, width=3, font=("Arial",25,""),
+                   textvariable=second)
+secondEntry.place(x=270,y=220)
+  
+  
+def submit():
 
-    if user_start == "y":
-        # Collect time information
-        t_now = dt.datetime.now()                       # Current time for reference.   [datetime object]
-        t_pom = p_length*60                                   # Pomodoro time                 [int, seconds]
-        t_delta = dt.timedelta(0,t_pom)                 # Time delta in mins            [datetime object]
-        t_fut = t_now + t_delta                         # Future time for reference     [datetime object]
-        delta_sec = b_length*60                                 # Break time, after pomodoro    [int, seconds]
-        t_fin = t_now + dt.timedelta(0,t_pom+delta_sec) # Final time (w/ 5 mins break)  [datetime object]
+    Pomodoro_length.configure(text = "")
+    try:
+        # the input provided by the user is
+        
+        temp = int(Pomodoro_length.get())*60
+        full = int(Break_length.get())*60 + temp
+    except:
+        print("Please input the right value")
 
-        print(t_now)
-        messagebox.showinfo("Pomodoro Started!", "\nIt is now "+t_now.strftime("%H:%M") + " hrs. \nTimer set for 25 mins.")
-        main_pomodoro(t_now, t_fut, t_fin, t_pom,delta_sec)
-    elif user_start == "n":
-        messagebox.showinfo("Juan pomodoro clock", "See you next time!")
+    while full >-1:
+         
+        # divmod(firstvalue = full//60, secondvalue = full%60)
+        mins,secs = divmod(full,60)
+           
+        # using format () method to store the value up to
+        # two decimal places
+        
+        minute.set("{0:2d}".format(mins))
+        second.set("{0:2d}".format(secs))
+  
+        # updating the GUI window after decrementing the
+        # full value every time
+        root.update()
+        time.sleep(1)
 
+        if full == temp:
+            mySounds.break_sound()
+        # when full value = 0; then a messagebox pop's up
+        # with a message:"Time's up"
+        if (full == 0):
+            mySounds.play_song()
+         
+        # after every one sec the value of full will be decremented
+        # by one
+        full -= 1
 
-canvas1 = tk.Canvas(root, width = 600, height = 300)
-canvas1.pack()
+# Diplay clock (extra)
+def digitalclock():
+   text_input = time.strftime("%H:%M:%S")
+   clock.config(text=text_input)
+   clock.after(200, digitalclock)
+
+#Clock
+clock = Label(root, font=("Courier", 12, 'bold'), fg="green", bd =10)
+clock.place(relx= 1.0, rely = 0.01, anchor= 'ne') 
+# button widget
+btn = Button(root, text='Start Pomodoro', bd='5',
+             command= submit)
+btn.place(x = 230,y = 170)
 
 #Title
-canvas1.create_text(300, 20, font="Times 16 bold", text="Welcome to juan's pomodoro app!")
+canvas.create_text(300, 20, font="Times 16 bold", text="Welcome to Kayaba's pomodoro app!")
 #Introduction
-canvas1.create_text(300, 50, font="Times 12", text="Enter the lenght of the pomodoro and the desired break time in minutes")
+canvas.create_text(300, 50, font="Times 12", text="Enter the lenght of the pomodoro and the desired break time in minutes")
 
 #Pomodoro lenght text
-canvas1.create_text(150, 90, font="Times 11", text="Enter the lenght of the pomodoro: ")
+canvas.create_text(150, 90, font="Times 11", text="Enter the lenght of the pomodoro: ")
 #P lenght input
+
 Pomodoro_length = tk.Entry (root) 
-canvas1.create_window(350, 90, window=Pomodoro_length)
+canvas.create_window(350, 90, window=Pomodoro_length)
 
 #Pomodoro break text
-canvas1.create_text(136, 140, font="Times 11", text="Enter the lenght of the break: ")
+canvas.create_text(136, 140, font="Times 11", text="Enter the lenght of the break: ")
 #B lenght input
 Break_length = tk.Entry (root) 
-canvas1.create_window(350, 140, window=Break_length)
+canvas.create_window(350, 140, window=Break_length)
 
 
-#answer = messagebox.askyesno(title='confirmation',message='Are you sure that you want to quit?')
-Start_button = tk.Button(text='Start pomodoro', command=start)
-canvas1.create_window(300, 220, window=Start_button)
 
+
+digitalclock()
+
+# infinite loop which is required to
+# run tkinter program infinitely
+# until an interrupt occurs
 root.mainloop()
